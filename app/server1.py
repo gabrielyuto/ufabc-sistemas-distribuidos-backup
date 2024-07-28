@@ -1,13 +1,13 @@
 from socket import * 
 import servicesdb
 
-def connection_db():
-  DB_HOST = "127.0.0.1"
-  DB_NAME = "database1"
-  DB_USER = "user1"
-  DB_PASS = "password1"
+def verificar_status_banco():
+  contagem = servicesdb.contagem_registros_db("server1")
 
-  return servicesdb.get_db_connection(DB_HOST, DB_NAME, DB_USER, DB_PASS)
+  if (contagem > 10):
+    return "CHEIO"
+  
+  return "LIVRE"
 
 if __name__ == "__main__":
   serverPort = 12001
@@ -15,17 +15,19 @@ if __name__ == "__main__":
   serverSocket.bind(('', serverPort))
   serverSocket.listen(1)
 
-  print('The server 1 is ready to receive')
+  print('STATUS SERVIDOR 1: READY')
 
   while 1:
     connectionSocket, addr = serverSocket.accept()
     sentence = connectionSocket.recv(1024)
+    sentence_decoded = sentence.decode()
+
+    if (sentence_decoded == "VERIFICAR"):
+      status = verificar_status_banco()
+      status_db_encoded = status.encode()
+      connectionSocket.send(status_db_encoded)
+      connectionSocket.close()
     
-    if (sentence.upper() == "VERIFICAR"):
-      verificacao = "CHEIO"
-      connectionSocket.send(verificacao)
-
-    print('RESPONDENDO: ', verificacao)
-
+    else:
+      servicesdb.gravar_registro("server1", sentence_decoded)
     # connectionSocket.send(verificacao)
-    connectionSocket.close()

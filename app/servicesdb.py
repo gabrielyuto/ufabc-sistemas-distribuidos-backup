@@ -1,14 +1,20 @@
 import psycopg2
 from psycopg2 import sql
 
-def get_db_connection(DB_HOST,DB_PORT, DB_NAME, DB_USER, DB_PASS):
+def get_db_connection():
+  DB_HOST = "localhost"
+  DB_PORT = "5432"
+  DB_USER = "user"
+  DB_PASS = "password"
+  DB_NAME = "database"
+
   try:
     conn = psycopg2.connect(
       host=DB_HOST,
       port=DB_PORT,
-      database=DB_NAME,
       user=DB_USER,
-      password=DB_PASS
+      password=DB_PASS,
+      database=DB_NAME,
     )
     return conn
   except Exception as e:
@@ -38,17 +44,50 @@ def create_table(TABLE_NAME, connection):
     cur.close()
     connection.close()
 
-def insert_data(file):
+def prepare_db():
+  connection = get_db_connection()
+  create_table("server1", connection)
+
+  connection = get_db_connection()
+  create_table("server2", connection)
+
+def contagem_registros_db(TABLE_NAME):
+  connection = get_db_connection()
+
+  if connection is None:
+    return
+
+  cur = connection.cursor()
+  try:
+    query = sql.SQL(
+      """
+      SELECT COUNT(*) FROM {};
+      """
+    ).format(sql.Identifier(TABLE_NAME))    
+
+    cur.execute(query)
+    total = cur.fetchone()[0]
+    
+    return total
+  except Exception as e:
+    print(f"Erro ao ler dados: {e}")
+  finally:
+    cur.close()
+    connection.close()
+
+def gravar_registro(TABLE_NAME, file_value):
   conn = get_db_connection()
+  
   if conn is None:
     return
 
   cur = conn.cursor()
   try:
-    cur.execute(
-      "INSERT INTO backup-db1 (file) VALUES (%s)",
-      (file)
-    )
+    query = sql.SQL("""
+            INSERT INTO {} (file) VALUES (%s);
+        """).format(sql.Identifier(TABLE_NAME)) 
+
+    cur.execute(query, [file_value])
     conn.commit()
     print("Dados inseridos com sucesso.")
   except Exception as e:
@@ -56,19 +95,3 @@ def insert_data(file):
   finally:
     cur.close()
     conn.close()
-
-def read_data(connection):
-  if connection is None:
-    return
-
-  cur = connection.cursor()
-  try:
-    cur.execute("SELECT * FROM backup-db1;")
-    rows = cur.fetchall()
-    for row in rows:
-      print(row)
-  except Exception as e:
-    print(f"Erro ao ler dados: {e}")
-  finally:
-    cur.close()
-    connection.close()

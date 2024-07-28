@@ -14,4 +14,5 @@ if __name__ == "__main__":
 
   modifiedSentence = clientSocket.recv(1024)
 
+  print("Do cliente ", modifiedSentence)
   clientSocket.close()

@@ -1,4 +1,4 @@
-import preparedb
+import servicesdb
 
 if __name__ == "__main__":
-  preparedb.execute
+  servicesdb.prepare_db()
