@@ -2,12 +2,17 @@ from socket import *
 import servicesdb
 
 def verify_db_status():
+  limit_table = 2
   count = servicesdb.count_register("server1")
+  print("------------------------------")
+  print("Limit of server 1: ", limit_table)
   print("Total count in table: ", count)
 
-  if (count >= 3):
+  if (count >= limit_table):
+    print("Server 1 is Full")
     return "Full"
   
+  print("Server 1 is Free")
   return "Free"
 
 def reply(port):
@@ -50,7 +55,7 @@ if __name__ == "__main__":
     
     else:
       servicesdb.save("server1", data)
-      reply(data)
+      #reply(data)
     
     client_socket.close()
   
