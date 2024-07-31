@@ -1,18 +1,18 @@
 from socket import *
 
 if __name__ == "__main__":
-  serverName = "127.0.0.1"
-  serverPort = 12000
+  host = "127.0.0.1"
+  port = 12000
+  file_path = '../teste/arquivo.txt'
 
-  clientSocket = socket(AF_INET, SOCK_STREAM)
-  clientSocket.connect((serverName, serverPort))
-  sentence = input("Digite algo em letra maiúscula: ")
+  client_socket = socket(AF_INET, SOCK_STREAM)
+  client_socket.connect((host, port))
+  
+  with open(file_path, 'rb') as f:
+    data = f.read(1024)
+    while data:
+      client_socket.send(data)
+      data = f.read(1024)
 
-  sen = sentence.encode()
-
-  clientSocket.send(sen)
-
-  modifiedSentence = clientSocket.recv(1024)
-
-  print("Do cliente ", modifiedSentence)
-  clientSocket.close()
+  client_socket.close()
+  print('File sent')

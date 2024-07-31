@@ -5,14 +5,14 @@ def verify_db_status():
   count = servicesdb.count_register("server1")
   print("Total count in table: ", count)
 
-  if (count >= 3):
+  if (count >= 10):
     return "Full"
   
   return "Free"
 
 def reply(port):
   host = "127.0.0.1"
-  port = 12002
+  port = 12001
 
   client_socket = socket(AF_INET, SOCK_STREAM)
   client_socket.connect((host, port))
@@ -29,12 +29,12 @@ def reply(port):
 
 if __name__ == "__main__":
   host = "127.0.0.1"
-  port = 12001
+  port = 12002
 
   server_socket = socket(AF_INET, SOCK_STREAM)
   server_socket.bind((host, port))
   server_socket.listen(1)
-  print(f'Server 1 listening on {host}:{port}')
+  print(f'Server 2 listening on {host}:{port}')
 
   while True:
     client_socket, addr = server_socket.accept()
@@ -49,7 +49,7 @@ if __name__ == "__main__":
       client_socket.close()
     
     else:
-      servicesdb.save("server1", data)
+      servicesdb.save("server2", data)
       reply(data)
     
     client_socket.close()

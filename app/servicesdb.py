@@ -30,7 +30,8 @@ def create_table(TABLE_NAME, connection):
     query = sql.SQL("""
       CREATE TABLE IF NOT EXISTS {} (
         id SERIAL PRIMARY KEY,
-        file VARCHAR(255)
+        file BYTEA,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     """).format(sql.Identifier(TABLE_NAME))
 
@@ -51,7 +52,7 @@ def prepare_db():
   connection = get_db_connection()
   create_table("server2", connection)
 
-def contagem_registros_db(TABLE_NAME):
+def count_register(TABLE_NAME):
   connection = get_db_connection()
 
   if connection is None:
@@ -75,7 +76,7 @@ def contagem_registros_db(TABLE_NAME):
     cur.close()
     connection.close()
 
-def gravar_registro(TABLE_NAME, file_value):
+def save(TABLE_NAME, file_value):
   conn = get_db_connection()
   
   if conn is None:
@@ -87,7 +88,7 @@ def gravar_registro(TABLE_NAME, file_value):
             INSERT INTO {} (file) VALUES (%s);
         """).format(sql.Identifier(TABLE_NAME)) 
 
-    cur.execute(query, [file_value])
+    cur.execute(query, [psycopg2.Binary(file_value)])
     conn.commit()
     print("Dados inseridos com sucesso.")
   except Exception as e:
