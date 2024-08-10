@@ -15,26 +15,20 @@ def verify_db_status():
   print("Server 2 is Free")
   return "Free"
 
-def reply(port):
-  host = "127.0.0.1"
-  port = 12001
+def send_to_replica(data, replica_port):
+    host = "127.0.0.1"
+    try:
+        client_socket = socket(AF_INET, SOCK_STREAM)
+        client_socket.connect((host, replica_port))
+        client_socket.send(data)
+        client_socket.close()
+    except Exception as e:
+        print(f"Error sending data to replica: {e}")
 
-  client_socket = socket(AF_INET, SOCK_STREAM)
-  client_socket.connect((host, port))
-  client_socket.send(data)
-
-  modified_sentence = client_socket.recv(1024)
-  modified_sentence_decoded = modified_sentence.decode()
-
-  print("From server: ", modified_sentence_decoded)
-
-  client_socket.close()
-
-  return modified_sentence_decoded
 
 if __name__ == "__main__":
   host = "127.0.0.1"
-  port = 12002
+  port = 12001 if 'server1' in __file__ else 12002
 
   server_socket = socket(AF_INET, SOCK_STREAM)
   server_socket.bind((host, port))
@@ -51,11 +45,13 @@ if __name__ == "__main__":
       status = verify_db_status()
       status_db_encoded = status.encode()
       client_socket.send(status_db_encoded)
-      client_socket.close()
-    
+
+    elif data_decoded.startswith("Replica:"):
+      replica_port = int(data_decoded.split(":")[1])
+
+      send_to_replica(data, replica_port)
     else:
-      servicesdb.save("server2", data)
-      #reply(data)
+      servicesdb.save("server1" if port == 12001 else "server2", data)
     
     client_socket.close()
   
