@@ -28,7 +28,7 @@ def send_to_replica(data, replica_port):
 
 if __name__ == "__main__":
   host = "127.0.0.1"
-  port = 12001 if 'server1' in __file__ else 12002
+  port = 12002
 
   server_socket = socket(AF_INET, SOCK_STREAM)
   server_socket.bind((host, port))
@@ -46,12 +46,20 @@ if __name__ == "__main__":
       status_db_encoded = status.encode()
       client_socket.send(status_db_encoded)
 
-    elif data_decoded.startswith("Replica:"):
-      replica_port = int(data_decoded.split(":")[1])
+      if status == "Free":
+        servicesdb.save( "server2", data)
 
-      send_to_replica(data, replica_port)
-    else:
-      servicesdb.save("server1" if port == 12001 else "server2", data)
+        if data_decoded.startswith("Replica:"):
+          replica_port = int(data_decoded.split(":")[1])
+
+          client_socket.close()
+
+          print("PORTA:")
+          print(replica_port)
+
+          send_to_replica(data, replica_port)
+
+      else:
+        print("Server is Full")    
     
     client_socket.close()
-  
