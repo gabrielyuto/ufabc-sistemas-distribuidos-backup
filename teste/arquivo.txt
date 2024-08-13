@@ -1,6 +1,2 @@
 "Ola mundo!"
-"Ola mundo!"
-"Ola mundo!"
-"Ola mundo!"
-"Ola mundo!"
-
+"Arquivo de teste"

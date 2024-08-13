@@ -2,17 +2,17 @@ from socket import *
 import servicesdb
 
 def verify_db_status():
-  limit_table = 10
-  count = servicesdb.count_register("server2")
+  limit_table = 3
+  count = servicesdb.count_register("server3")
   print("--------- VERIFICACAO DO SERVIDOR PELO MANAGER ---------")
-  print("Limite do servidor 2: ", limit_table)
-  print("Total de registros no servidor 2: ", count)
+  print("Limite do servidor 3: ", limit_table)
+  print("Total de registros no servidor 3: ", count)
 
   if (count >= limit_table):
-    print("Servidor 2 cheio")
+    print("Servidor 3 cheio")
     return "Full"
   
-  print("Servidor 2 livre")
+  print("Servidor 3 livre")
   print("--------------------------------------------------------")
   return "Free"
 
@@ -29,12 +29,12 @@ def send_to_replica(data, replica_port):
 
 if __name__ == "__main__":
   host = "127.0.0.1"
-  port = 12002
+  port = 12003
 
   server_socket = socket(AF_INET, SOCK_STREAM)
   server_socket.bind((host, port))
   server_socket.listen(1)
-  print(f'Servidor 2 escutando em {host}:{port}')
+  print(f'Servidor 3 escutando em {host}:{port}')
 
   while True:
     client_socket, addr = server_socket.accept()
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         numero_porta_replica = int(cabecalho.split(':')[1])
         conteudo_arquivo = dados_separados[1]
 
-        servicesdb.save("server2", conteudo_arquivo)
+        servicesdb.save("server3", conteudo_arquivo)
 
         header = f"REPLICA\n"
         file_with_header = header.encode('utf-8') + conteudo_arquivo
@@ -64,6 +64,6 @@ if __name__ == "__main__":
       
       elif (cabecalho.startswith("REPLICA")):
           conteudo_arquivo = dados_separados[1]
-          servicesdb.save("server2", conteudo_arquivo)
+          servicesdb.save("server3", conteudo_arquivo)
     
     client_socket.close()

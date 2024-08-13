@@ -11,7 +11,7 @@ def send_file(file_name, host='127.0.0.1', port=12000):
         client_socket = socket(AF_INET, SOCK_STREAM)
         client_socket.connect((host, port))
 
-        file_path = f'../teste/{file_name}'
+        file_path = f'teste/{file_name}'
         
         # Enviar o arquivo
         with open(file_path, 'rb') as f:

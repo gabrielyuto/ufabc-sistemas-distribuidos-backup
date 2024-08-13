@@ -4,15 +4,16 @@ import servicesdb
 def verify_db_status():
   limit_table = 2
   count = servicesdb.count_register("server1")
-  print("------------------------------")
-  print("Limit of server 1: ", limit_table)
-  print("Total count in table: ", count)
+  print("--------- VERIFICACAO DO SERVIDOR PELO MANAGER ---------")
+  print("Limite do servidor 1: ", limit_table)
+  print("Total de registros no servidor 1: ", count)
 
   if (count >= limit_table):
-    print("Server 1 is Full")
+    print("Servidor 1 cheio")
     return "Full"
   
-  print("Server 1 is Free")
+  print("Servidor 1 livre")
+  print("--------------------------------------------------------")
   return "Free"
 
 def send_to_replica(data, replica_port):
@@ -23,7 +24,7 @@ def send_to_replica(data, replica_port):
         client_socket.send(data)
         client_socket.close()
     except Exception as e:
-        print(f"Error sending data to replica: {e}")
+        print(f"Erro ao enviar os dados a replica: {e}")
 
 
 if __name__ == "__main__":
@@ -33,35 +34,37 @@ if __name__ == "__main__":
   server_socket = socket(AF_INET, SOCK_STREAM)
   server_socket.bind((host, port))
   server_socket.listen(1)
-  print(f'Server 1 listening on {host}:{port}')
+  print(f'Servidor 1 escutando em {host}:{port}')
 
   while True:
     client_socket, addr = server_socket.accept()
     data = client_socket.recv(1024)
     data_decoded = data.decode()
-    print(f'Connection from {addr}')
-  
+    print(f'Conexao de {addr}')
   
     if (data_decoded == "Analyze"):
       status = verify_db_status()
       status_db_encoded = status.encode()
       client_socket.send(status_db_encoded)
 
-      if status == "Free":
-        servicesdb.save("server1", data)
+    else:
+      # Separar o cabeçalho do conteúdo do arquivo
+      dados_separados = data.split(b'\n', 1)
+      cabecalho = dados_separados[0].decode('utf-8')
 
-        if data_decoded.startswith("Replica:"):
-          replica_port = int(data_decoded.split(":")[1])
+      if (cabecalho.startswith("PORTA")):
+        numero_porta_replica = int(cabecalho.split(':')[1])
+        conteudo_arquivo = dados_separados[1]
 
-          client_socket.close()
+        servicesdb.save("server1", conteudo_arquivo)
 
-          print("PORTA:")
-          print(replica_port)
-
-          send_to_replica(data, replica_port)
-
-      else:
-        print("Server is Full")    
+        header = f"REPLICA\n"
+        file_with_header = header.encode('utf-8') + conteudo_arquivo
+        send_to_replica(file_with_header, numero_porta_replica)
       
+      elif (cabecalho.startswith("REPLICA")):
+        conteudo_arquivo = dados_separados[1]
+        servicesdb.save("server1", conteudo_arquivo)
+    
     client_socket.close()
   

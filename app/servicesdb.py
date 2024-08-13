@@ -52,6 +52,9 @@ def prepare_db():
   connection = get_db_connection()
   create_table("server2", connection)
 
+  connection = get_db_connection()
+  create_table("server3", connection)
+
 def count_register(TABLE_NAME):
   connection = get_db_connection()
 
