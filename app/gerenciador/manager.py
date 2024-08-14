@@ -59,7 +59,6 @@ if __name__ == "__main__":
   while True:
     client_socket, addr = server_socket.accept()
     data = client_socket.recv(1024)
-    data_decoded = data.decode()
     print(f'Conexao de {addr}')
     
     try:
